@@ -1,4 +1,3 @@
-import os
 import time
 import uuid
 import pandas as pd
@@ -9,7 +8,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
 def install_chrome():
     os.system("wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
@@ -27,7 +25,7 @@ def scrape_sicilia(inizio, fine):
     options.add_argument("--enable-javascript")
     options.binary_location = "/usr/bin/google-chrome"
 
-    service = Service(ChromeDriverManager().install())
+    service = Service("/usr/bin/chromedriver")
     browser = webdriver.Chrome(service=service, options=options)
     wait = WebDriverWait(browser, 10)
 
