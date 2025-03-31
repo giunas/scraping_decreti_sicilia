@@ -1,3 +1,8 @@
+import os
+import time
+import uuid
+import pandas as pd
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -5,19 +10,23 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
-import time
-import pandas as pd
-import uuid
+
+def install_chrome():
+    os.system("wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
+    os.system("apt-get update && apt-get install -y ./google-chrome-stable_current_amd64.deb")
 
 def scrape_sicilia(inizio, fine):
+    # Se Chrome non è installato, installalo
+    if not os.path.exists("/usr/bin/google-chrome"):
+        install_chrome()
+
     options = Options()
     options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
     options.add_argument("--enable-javascript")
-    options.binary_location = "/usr/bin/chromium-browser"
+    options.binary_location = "/usr/bin/google-chrome"
 
     service = Service(ChromeDriverManager().install())
     browser = webdriver.Chrome(service=service, options=options)
@@ -27,7 +36,7 @@ def scrape_sicilia(inizio, fine):
         browser.get(url)
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "table")))
 
-    url = f"https://www.regione.sicilia.it/istituzioni/servizi-informativi/decreti-e-direttive?start_date={inizio}&end_date={fine}&f%5B0%5D=group%3A7&f%5B1%5D=group%3A26&subject=&field_decree_number="
+    url = f"https://www.regione.sicilia.it/istituzioni/servizi-informativi/decreti-e-direttive?start_date={inizio}&end_date={fine}&f%5B0%5D=group%3A7&f%5B1%5D=group%3A26"
     open_url(url)
 
     try:
@@ -39,10 +48,13 @@ def scrape_sicilia(inizio, fine):
 
     data_list = []
     pagination_buttons = browser.find_elements(By.XPATH, "//li[contains(@class, 'page-item')]")
-    pagination_buttons_len = len(pagination_buttons)
-    last_page = int(pagination_buttons[pagination_buttons_len - 2].find_element(By.TAG_NAME, "a").text.strip().split()[-1]) - 1
-    counter = 0
+    if pagination_buttons:
+        pagination_buttons_len = len(pagination_buttons)
+        last_page = int(pagination_buttons[pagination_buttons_len - 2].find_element(By.TAG_NAME, "a").text.strip().split()[-1]) - 1
+    else:
+        last_page = 0
 
+    counter = 0
     while True:
         soup = BeautifulSoup(browser.page_source, "html.parser")
         table = soup.find('table', {'class': 'cols-7 table-striped table-borderless table table--smaller-font'})
@@ -56,12 +68,12 @@ def scrape_sicilia(inizio, fine):
         if counter == last_page:
             break
         counter += 1
-        next_url = f"https://www.regione.sicilia.it/istituzioni/servizi-informativi/decreti-e-direttive?start_date={inizio}&end_date={fine}&f%5B0%5D=group%3A7&f%5B1%5D=group%3A26&subject=&field_decree_number=&page={counter}"
+        next_url = f"{url}&page={counter}"
         open_url(next_url)
         time.sleep(5)
 
     browser.quit()
-    filename = f"decreti_sicilia_{uuid.uuid4().hex}.csv"
+    filename = f"/tmp/decreti_sicilia_{uuid.uuid4().hex}.csv"
     df = pd.DataFrame(data_list, columns=["N.", "Oggetto", "Data emissione", "Pubblicazione", "Tipologia", "Assessorato/Dipartimento"])
     df.to_csv(filename, index=False)
     return filename
