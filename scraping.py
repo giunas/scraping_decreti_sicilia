@@ -1,6 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -18,8 +18,7 @@ def scrape_sicilia(inizio, fine):
     options.add_argument("--enable-javascript")
     options.binary_location = "/usr/bin/google-chrome"
 
-    service = Service("/usr/bin/chromedriver")
-    browser = webdriver.Chrome(service=service, options=options)
+    browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
     wait = WebDriverWait(browser, 5)
 
     def open_url(url):
