@@ -9,14 +9,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def install_chrome():
-    os.system("wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
-    os.system("apt-get update && apt-get install -y ./google-chrome-stable_current_amd64.deb")
 
-def scrape_sicilia(inizio, fine):
-    if not os.path.exists("/usr/bin/google-chrome"):
-        install_chrome()
-    
+def scrape_sicilia(inizio, fine):    
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
