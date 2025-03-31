@@ -1,10 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import time
 import pandas as pd
@@ -17,11 +17,11 @@ def scrape_sicilia(inizio, fine):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--enable-javascript")
-    options.binary_location = "/usr/bin/google-chrome"
+    options.binary_location = "/usr/bin/chromium-browser"
 
     service = Service(ChromeDriverManager().install())
     browser = webdriver.Chrome(service=service, options=options)
-    wait = WebDriverWait(browser, 5)
+    wait = WebDriverWait(browser, 10)
 
     def open_url(url):
         browser.get(url)
