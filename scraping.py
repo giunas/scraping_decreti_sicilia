@@ -10,7 +10,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-def scrape_sicilia(inizio, fine):    
+def scrape_sicilia(inizio, fine):
+    print("CHROME:", os.path.exists("/usr/bin/google-chrome"))
+    print("CHROMEDRIVER:", os.path.exists("/usr/bin/chromedriver"))
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
